@@ -46,3 +46,4 @@ jobs:
       - name: Run Trivy vulnerability scanner in tarball mode without Java DB
         run: |
           ./trivy image --input supermariolatestdockerimage.tar --severity CRITICAL,HIGH --exit-code 1 --cache-dir ~/.cache/trivy/db --scanners vuln
+
