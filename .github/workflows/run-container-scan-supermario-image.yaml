@@ -1,36 +1,61 @@
 name: "Run Container Scan on Super Mario Docker Image with Quality Gate"
- 
+
 on:
   push:
     branches:
       - main
- 
+
 env:
   VERSION: $(( $(cat version.txt) + 1 ))
-  
+
 jobs:
-  
   run_container_image_scan_on_supermario_docker_image:
-    runs-on: ubuntu-latest	
- 
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
- 
+
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-        
+
       - name: Get Docker Image from Docker Hub
         run: |
           docker pull docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
           docker save -o supermariolatestdockerimage.tar docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
-     
-      - name: Run Trivy vulnerability scanner in tarball mode
-        uses: aquasecurity/trivy-action@master
+
+      - name: Set up Trivy Cache Directory
+        run: mkdir -p ~/.cache/trivy/db
+
+      - name: Cache Trivy DB
+        uses: actions/cache@v3
         with:
-          input: /github/workspace/supermariolatestdockerimage.tar
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+          path: ~/.cache/trivy/db
+          key: ${{ runner.os }}-trivy-db-cache
+          restore-keys: |
+            ${{ runner.os }}-trivy-db-cache
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $(pwd)
+
+      - name: Download Trivy DB (if not cached)
+        run: |
+          ./trivy image --download-db-only --cache-dir ~/.cache/trivy/db || echo "Using cached database if download fails"
+
+      - name: Handle DB Download Error
+        run: |
+          echo "Attempting to download Trivy DB..."
+          ./trivy image --download-db-only --cache-dir ~/.cache/trivy/db || echo "Error: DB download failed - OCI repository error. Retrying or using cached DB."
+          
+      - name: Run Trivy vulnerability scanner in tarball mode with cached DB
+        run: |
+          ./trivy image --input supermariolatestdockerimage.tar --severity CRITICAL,HIGH --exit-code 1 --cache-dir ~/.cache/trivy/db --skip-db-update
+          
+      - name: DB Error Handling Log
+        run: |
+          echo "Global options: DB download attempt failed, OCI artifact error during vulnerability DB download. Message: OCI repository error: GET https://ghcr.io/v2/aquasecurity/trivy-db/manifests/2: UNKNOWN: unknown error"
+
  
 
 
