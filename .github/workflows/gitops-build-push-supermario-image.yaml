@@ -24,3 +24,25 @@ jobs:
         run: |
           docker build -t docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }} .
           docker push docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
+              - name: Set up Trivy Cache Directory
+        run: mkdir -p ~/.cache/trivy/db
+
+      - name: Cache Trivy DB
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/trivy/db
+          key: ${{ runner.os }}-trivy-db-cache
+          restore-keys: |
+            ${{ runner.os }}-trivy-db-cache
+          
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $(pwd)
+
+      - name: Download Trivy DB (if not cached)
+        run: |
+          ./trivy image --download-db-only --cache-dir ~/.cache/trivy/db || echo "Using cached database if download fails"
+
+      - name: Run Trivy vulnerability scanner in tarball mode with cached DB
+        run: |
+          ./trivy image --input supermariolatestdockerimage.tar --severity CRITICAL,HIGH --exit-code 1 --cache-dir ~/.cache/trivy/db --skip-db-update
