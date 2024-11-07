@@ -21,27 +21,32 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
-      # Step 3: Install Grype
+      # Step 3: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # Step 4: Install Grype
       - name: Install Grype
         run: |
           curl -s https://raw.githubusercontent.com/anchore/grype/main/install.sh | sudo bash
 
-      # Step 4: Pull the Docker image to be scanned
+      # Step 5: Pull the Docker image to be scanned
       - name: Pull Docker Image
         run: |
-          docker pull docker.io/yourusername/yourimage:latest
+          docker pull docker.io/rahuldocker628/mariogitopsproject:latest
 
-      # Step 5: Save Docker Image as tarball
+      # Step 6: Save Docker Image as tarball
       - name: Save Docker Image as tarball
         run: |
-          docker save -o dockerimage.tar docker.io/yourusername/yourimage:latest
+          docker save -o supermariolatestdockerimage.tar docker.io/rahuldocker628/mariogitopsproject:latest
 
-      # Step 6: Run Grype to scan the Docker image tarball for vulnerabilities
+      # Step 7: Run Grype to scan the Docker image tarball for vulnerabilities
       - name: Run Grype Scan
         run: |
-          grype docker-archive://dockerimage.tar --fail-on critical --exit-code 0
+          grype docker-archive://supermariolatestdockerimage.tar --fail-on critical --exit-code 0
 
-      # Step 7: (Optional) Upload Grype scan report
+      # Step 8: (Optional) Upload Grype scan report
       - name: Upload Grype Report
         uses: actions/upload-artifact@v3
         with:
