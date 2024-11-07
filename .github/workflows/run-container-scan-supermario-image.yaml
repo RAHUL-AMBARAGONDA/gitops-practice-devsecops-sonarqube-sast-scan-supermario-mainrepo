@@ -26,7 +26,7 @@ jobs:
 
       - name: Set up Clair (using latest version)
         run: |
-          docker pull quay.io/projectquay/clair:latest
+          docker pull quay.io/projectquay/Clair v4
           docker run -d --name clair -p 6060:6060 -p 6061:6061 quay.io/projectquay/clair:latest
 
       - name: Run Clair vulnerability scan
