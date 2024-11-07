@@ -47,3 +47,23 @@ jobs:
         run: |
           ./trivy image --input supermariolatestdockerimage.tar --severity CRITICAL,HIGH --exit-code 1 --cache-dir ~/.cache/trivy/db --scanners vuln
 
+      - name: Set up Clair
+        run: |
+          docker pull quay.io/projectquay/clair:v4.4.0
+          docker run -d --name clair -p 6060:6060 -p 6061:6061 quay.io/projectquay/clair:v4.4.0
+
+      - name: Run Clair vulnerability scan
+        run: |
+          # Install Clair scanner
+          curl -L https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 -o clair-scanner
+          chmod +x clair-scanner
+          
+          # Run Clair scan
+          ./clair-scanner --ip YOUR_RUNNER_IP --report clair-report.json supermariolatestdockerimage.tar
+
+      - name: Upload Clair Scan Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Clair-Report
+          path: clair-report.json
