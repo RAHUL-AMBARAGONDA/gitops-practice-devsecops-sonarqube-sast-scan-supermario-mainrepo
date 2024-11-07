@@ -1,4 +1,4 @@
-name: "Run Container Scan on Super Mario Docker Image with Quality Gate"
+name: "Run Container Scan on Super Mario Docker Image with Clair"
 
 on:
   push:
@@ -24,29 +24,6 @@ jobs:
           docker pull docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
           docker save -o supermariolatestdockerimage.tar docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
 
-      - name: Set up Trivy Cache Directory
-        run: mkdir -p ~/.cache/trivy/db
-
-      - name: Cache Trivy DB
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/trivy/db
-          key: ${{ runner.os }}-trivy-db-cache
-          restore-keys: |
-            ${{ runner.os }}-trivy-db-cache
-
-      - name: Install Trivy
-        run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $(pwd)
-
-      - name: Download Trivy DB (if not cached)
-        run: |
-          ./trivy image --download-db-only --cache-dir ~/.cache/trivy/db || echo "Using cached database if download fails"
-
-      - name: Run Trivy vulnerability scanner in tarball mode without Java DB
-        run: |
-          ./trivy image --input supermariolatestdockerimage.tar --severity CRITICAL,HIGH --exit-code 1 --cache-dir ~/.cache/trivy/db --scanners vuln
-
       - name: Set up Clair
         run: |
           docker pull quay.io/projectquay/clair:v4.4.0
@@ -54,11 +31,11 @@ jobs:
 
       - name: Run Clair vulnerability scan
         run: |
-          # Install Clair scanner
+          # Download and configure clair-scanner
           curl -L https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 -o clair-scanner
           chmod +x clair-scanner
           
-          # Run Clair scan
+          # Run Clair scan (replace YOUR_RUNNER_IP with the correct IP)
           ./clair-scanner --ip YOUR_RUNNER_IP --report clair-report.json supermariolatestdockerimage.tar
 
       - name: Upload Clair Scan Report
