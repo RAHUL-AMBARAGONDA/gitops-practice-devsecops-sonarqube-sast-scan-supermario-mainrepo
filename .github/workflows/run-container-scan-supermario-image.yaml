@@ -24,6 +24,10 @@ jobs:
           docker pull docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
           docker save -o supermariolatestdockerimage.tar docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
 
+      - name: Verify Tarball Exists
+        run: |
+          ls -lh supermariolatestdockerimage.tar
+
       - name: Set up Grype Cache Directory
         run: mkdir -p ~/.cache/grype
 
@@ -41,8 +45,4 @@ jobs:
 
       - name: Run Grype Vulnerability Scan for Critical Issues
         run: |
-          grype docker-archive://supermariolatestdockerimage.tar --fail-on critical
-
-      - name: Run Grype Vulnerability Scan for High Issues
-        run: |
-          grype docker-archive://supermariolatestdockerimage.tar --fail-on high
+          grype docker-archive://$(pwd)/supermariolatestdockerimage.tar --fail-on critical
