@@ -1,4 +1,4 @@
-name: "Run Container Scan on Super Mario Docker Image with Clair"
+name: "Run Container Scan on Super Mario Docker Image with Quality Gate"
 
 on:
   push:
@@ -24,11 +24,10 @@ jobs:
           docker pull docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
           docker save -o supermariolatestdockerimage.tar docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
 
-      - name: Clair Scan
-        uses: santander-group/clair-scan-action@main
-  with:
-    image: vulnerables/web-dvwa
-    local: no
-    report_format: json
-    report_path: clair-report.json
-    updater: debian
+      - name: Install Grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run Grype Vulnerability Scan
+        run: |
+          grype docker-archive://supermariolatestdockerimage.tar --fail-on critical,high
