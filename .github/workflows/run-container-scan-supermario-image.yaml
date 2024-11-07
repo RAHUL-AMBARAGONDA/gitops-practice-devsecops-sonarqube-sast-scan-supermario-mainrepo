@@ -24,10 +24,10 @@ jobs:
           docker pull docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
           docker save -o supermariolatestdockerimage.tar docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
 
-      - name: Set up Clair
+      - name: Set up Clair (using latest version)
         run: |
-          docker pull quay.io/projectquay/clair:v4.4.0
-          docker run -d --name clair -p 6060:6060 -p 6061:6061 quay.io/projectquay/clair:v4.4.0
+          docker pull quay.io/projectquay/clair:latest
+          docker run -d --name clair -p 6060:6060 -p 6061:6061 quay.io/projectquay/clair:latest
 
       - name: Run Clair vulnerability scan
         run: |
