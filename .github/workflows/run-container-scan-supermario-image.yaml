@@ -24,24 +24,11 @@ jobs:
           docker pull docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
           docker save -o supermariolatestdockerimage.tar docker.io/rahuldocker628/mariogitopsproject:${{ env.VERSION }}
 
-      - name: Set up Clair (using latest version)
-        run: |
-          docker pull quay.io/projectquay/clair:v4
-       
-          docker run -d --name clair -p 6060:6060 -p 6061:6061 quay.io/projectquay/clair:latest
-
-      - name: Run Clair vulnerability scan
-        run: |
-          # Download and configure clair-scanner
-          curl -L https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 -o clair-scanner
-          chmod +x clair-scanner
-          
-          # Run Clair scan (replace YOUR_RUNNER_IP with the correct IP)
-          ./clair-scanner --ip YOUR_RUNNER_IP --report clair-report.json supermariolatestdockerimage.tar
-
-      - name: Upload Clair Scan Report
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: Clair-Report
-          path: clair-report.json
+      - name: Clair Scan
+        uses: santander-group/clair-scan-action@main
+  with:
+    image: vulnerables/web-dvwa
+    local: no
+    report_format: json
+    report_path: clair-report.json
+    updater: debian
