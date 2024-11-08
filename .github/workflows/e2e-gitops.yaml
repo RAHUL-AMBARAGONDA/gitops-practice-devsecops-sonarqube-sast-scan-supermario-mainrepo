@@ -83,7 +83,7 @@ jobs:
 
       - name: Run Grype Vulnerability Scan for Critical Issues
         run: |
-          grype docker-archive://$(pwd)/supermariolatestdockerimage.tar --fail-on critical || True
+          grype docker-archive://$(pwd)/supermariolatestdockerimage.tar --fail-on critical || true
           
   update_k8s_yaml_version_file_with_latest_image_tag:
     runs-on: ubuntu-latest
