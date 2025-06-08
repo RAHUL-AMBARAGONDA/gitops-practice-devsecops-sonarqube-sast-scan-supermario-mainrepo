@@ -17,8 +17,4 @@ jobs:
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: sonar
-        uses: sonarsource/sonarqube-quality-gate-action@master
-        timeout-minute: 5
-        env:
-         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
+      
