@@ -1,4 +1,4 @@
-name: "run sast"
+name: "run sast on docker"
 on:
   push:
     branches:
