@@ -31,7 +31,7 @@ jobs:
         with:
           image-ref: docker.io/rahulambaragonda/devsecops:${{ env.VERSION }}
           format: table
-          exit-code: 1
+          exit-code: 2
           severity: CRITICAL,HIGH
 
       - name: Push Docker Image
