@@ -4,6 +4,8 @@ on:
     workflows: ["run sast on docker"]
     types:
       - completed
+env:
+    VERSION: $(( $(cat version.txt) + 1 ))
 jobs:
     sonar_scan:
         runs-on: ubuntu-latest
